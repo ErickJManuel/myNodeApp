@@ -1,0 +1,209 @@
+
+STREAMS
+
+When writing applications that deal a lot with network access, and accessing files on a disk, one thing that we have to keep an eye
+out for is how the data is being transferred back and forth, this is where NODE.js really shines
+
+For ultimate efficiency, especially when we are dealing with large sized data that is being sent across the wire, we need to be
+able to access that data piece by piece or chunk by chunk.  When that happens we can start manipulating that data as soon as it
+arrives in the server and keep it from being held into memory all at once
+
+Streams are like channels where data can just flow through
+
+Streams can be of different types: we will focus on readable and writable streams or both
+
+The API described here is for streams in Node version v0.10.x a.k.a. streams2
+
+Some of the code we have seen in the course has already involved working with streams
+
+	http.createServer(function(request, response){
+		
+	});
+
+the request object is a readable stream (we read data from the request)
+the response object is a writable streams (we write data to the response)
+
+	http.createServer(function(request, response){
+		response.writeHead(200);
+		response.write("<p>Dog is running.</p>");
+
+		setTimeout(function(){
+			response.write("<p>Dog is done.</p>");
+			response.end();
+		}, 5000);
+	}).listen(8080);
+
+When we run this code and issue a request from the browser our server responds with a 200 status code and writes
+"Dog is running." to the stream.  The browser automatically receives that response, then we fire a setTimeout
+for 5 seconds, the stream is still kept open, the channel between the server and the client is still good to
+receive data.  So 5 seconds later we write again to the stream. This time "Dog is done." and finally we close it
+
+We've seen how to write to the response, but how might we read from the request?
+Request is a readable stream and it also inherits from the EventEmitter.  This is a great combination because
+the request object can communicate with other objects by firing events.
+
+												events
+	Readable Streams 			emits			readable 	-> fired when data is ready to be consumed
+	EventEmitter								end 		-> fired when the client is done sending all the data
+
+Let's print what we receive from the request
+
+	http.createServer(function(request, response) {
+		response.writeHead(200);							// start by writing the 200 status code
+
+		request.on('readable', function() {					// then we listen to the readable event on the request object
+			var chunk = null;								// declare a chunk variable
+
+			while (null !== (chunk = request.read())) {		// read out a chunk from the request and if it is not null
+
+				// We have to call the toString function becuase the chunks that we are receiving are buffers so we might
+				// be dealing with binary data here
+				console.log(chunk.toString());				// we will print it to the console
+			}
+		});
+
+		request.on('end', function() {						// finally we listen for the end event on the request object
+			response.end();									// Finish the response when the end event is fired
+		});
+	}).listen(8080);
+
+With this code we are printing to the console the data we are getting from the client
+
+How might we change this so that we echo back to the client the data that we get from the request?  -> We only have to change one line...
+
+
+	http.createServer(function(request, response) {
+		response.writeHead(200);
+
+		request.on('readable', function() {
+			var chunk = null;
+
+			while (null !== (chunk = request.read())) {
+
+				// Below line of code is the only line we need to change in order to echo the data that we receive from the client back to the client
+				// Notice that we are not calling the toString function here response.write does this for us behind the scenes
+				response.write(chunk);
+			}
+		});
+
+		request.on('end', function() {
+			response.end();
+		});
+	}).listen(8080);
+
+When all we have to do is write to a writable stream after we read from a readable stream, node actually has a helper method that we can use
+to pipe these 2 operations together (pipe)
+	request.pipe(response);
+
+pipe handles all of the event listening and chunk reading behind the scenes, we can take the code above and replace most of it with the pipe
+method
+
+	http.createServer(function(request, response) {
+		response.writeHead(200);
+		request.pipe(response);
+	}).listen(8080);
+
+When running curl from the terminal: $ curl -d 'hello' http://localhost:8080  -> we are sending in the string hello
+On the client we will see the string being sent back: Hello -> on client
+
+Kinda like the Unix command line the | (pipe) in UNIX streams the output of one operation to the input of the next one
+	cat 'bleh.txt' | grep 'something'
+
+Whenever you can prefer using pipe over listening for the readable event and manually reading the chunks
+	Protects your application from future breaking changes from the streams API, which is still not stable
+
+Remember that Node itself has not reached version 1.0 yet, so it is always good to check whether a specific API that we want to use
+is stable or not 	-> Can be done by looking at the docs
+Note that the File System stability score is 3 meaning it is stable; there are no major changes expected any time soon
+The Stream stability score is a 2 meaining it is still unstable; this means that changes to the API are still possible
+
+Next time that a new Node version is released, it's important to review for any changes for streams or any other APIs that are
+unstable that our node application might be using
+
+Reading and Writing a file
+Read the contents from a file in the filesystem and stream it to another file
+
+	var fs = require('fs');										// require the filesystem module
+
+	var file = fs.createReadStream("readme.md");				// create a readStream for the original file (readme.md) and store that in the file variable
+	var newFile = fs.createWriteStream("readme_copy.md");		// create a writeStream for the copy (readme_copy.md) and store that in the newFile variable
+
+	file.pipe(newFile);											// then all we have to do is call file.pipe and pass in the new file
+
+Some third party libraries heavily rely on streams
+	The gulp build system exposes the pipe function as its public API
+	http://gulpjs.com/
+
+We can pipe any readstream to any writestream -> combining the 2 examples of reading from a request and piping to a file
+
+	var fs = require('fs');
+	var http = require('http');
+
+	http.createServer(function(request, response) {
+		var newFile = fs.createWriteStream('readme_copy.md');	// keeping writestream as is, but now readstream is a function call from a request
+		request.pipe(newFile);
+
+		request.on('end', function() {							// lastly listen for the end event
+			response.end('uploaded!');							// and close the response
+		});
+	}).listen(8080);
+
+	$ curl --uploaded-file readme.md http://localhost:8080
+	returns uploaded!
+
+One of the reasons Ryan Dahl created Node.js was to deal with file uploads.
+
+EJM - What is the drama with implementing file uploads correctly?  According to code school Node makes this much easier...
+
+A lot of web apps will try to load the entire file into memory before writing it to the disk.  This causes a bottleneck for the server
+and all the users of the web app.  Displaying file upload progress is also tricky using this.
+
+We need to be able to run a file upload either by using curl or a file upload tool on the browser.
+	$curl --upload-file file.jbp http://localhost:8080
+
+Output is a lin with a progress percentage like so:
+	progress: 3%
+	progress: 6%
+	progress: 9%
+	progress: 12%
+	...
+	progress: 99%
+	progress: 100%
+
+In order to do this we need to implement 2 modules:
+	HTTP Server
+	File System
+
+Start with our upload code:
+
+	http.createServer(function(request, response) {
+		var newFile = fs.createWriteStream('readme_copy.md');
+		request.pipe(newFile);
+
+		request.on('end', function() {
+			response.end('uploaded!');
+		});
+	}).listen(8080);
+
+Add functionality in our code from above to find the entire size of the file:
+
+	http.createServer(function(request, response) {
+		var newFile = fs.createWriteStream('readme_copy.md');
+		var fileBytes = request.headers['content-length'];						// This is how we find the size of the file
+		var uploadedBytes = 0;													// Tracker for bytes uploaded, initialized
+
+		request.on('readable', function(){										// Listen for the readable request
+			var chunk = null;
+			while(null !== (chunk = request.read())){							// Loop through and read all of the chunks from the request
+				uploadedBytes += chunk.length;									// update uploadedBytes by Chunk size
+				var progress = (uploadedBytes / fileBytes) * 100;				// calculate the percentage for progress bar
+				response.write("progress: " + parseInt(progress, 10) +  "%\n");	// send response back to the client / parseInt used to round our result to an intenger
+			}
+		});
+
+		request.pipe(newFile);
+
+		request.on('end', function() {
+			response.end('uploaded!');
+		});
+	}).listen(8080);

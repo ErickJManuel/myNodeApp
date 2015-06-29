@@ -1,0 +1,57 @@
+<!--
+	1.	Load the socket.io.js script. The socket.io.js path you should use is '/socket.io/socket.io.js'. Express knows to serve the socket.io client js for this path.
+	2.	Using the global io object that's now available for us, connect to the socket.io server at http://localhost:8080.
+//-->
+
+<!--
+<script src="/socket.io/socket.io.js"></script>	 
+
+<script>
+var socket = io.connect('http://localhost:8080');
+</script>
+//-->
+
+<!--
+	1.	First, listen for 'question' events from the server.
+	2.	Now, have the event callback function call the insertQuestion function. The insertQuestion function is already created for you, and it's placed in its own file.
+		It expects exactly one argument - the question.
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/insertQuestion.js"></script>
+
+<script>
+	var server = io.connect('http://localhost:8080');
+
+	// Insert code here
+	server.on('question', function(question){		// step 1
+		insertQuestion(question);					// step 2
+	});
+</script>
+//-->
+
+<!--
+	1.	Listen for the 'answer' event off of the server.
+	2.	Call the answerQuestion function, passing in both the question and the answer that was broadcast from the server.
+//-->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+	var server = io.connect('http://localhost:8080');
+
+	server.on('question', function(question) {
+		insertQuestion(question);
+	});
+
+	server.on('answer', function(answer, question){	// step 1
+		answerQuestion(answer, question);			// step 2
+	});
+
+	//Don't worry about these methods, just assume 
+	//they insert the correct html into the DOM
+	// var insertQuestion = function(question) {
+	// }
+
+	// var answerQuestion = function(question, answer) {
+	// }
+</script>
+ 

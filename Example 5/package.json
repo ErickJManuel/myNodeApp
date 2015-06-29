@@ -1,0 +1,14 @@
+/*
+	In order for us to display the json data on our website we need to do the following:
+		First we need to install a templating library
+			for this example we will use EJS (embedded javascript)
+				$ npm install --save ejs
+		By default it would look for templates under the views directory
+			/Home/eric/my_app/views
+
+*/
+
+"dependencies": {
+	"express": "4.9.6",
+	"ejs": "1.0.0"
+}

@@ -1,0 +1,19 @@
+SOCKET.IO
+	Modern browsers have websockets
+		Allows for duplex communication
+		Can't rely on browsers having this
+			SOCKET.IO library exists for this reason
+				Abstracts websockets with fallbacks
+
+	Install socket.io
+		$ npm install --save socket.io
+
+Running our code
+	$ node app.js
+
+	log in to web browser
+
+	We get an alert pop up and we get the log message
+
+Socket io has a broadcast property that will emit the messages to everyone in the chatroom
+	socket.broadcast.emit("message", 'Hello');

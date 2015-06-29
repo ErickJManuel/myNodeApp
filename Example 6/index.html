@@ -1,0 +1,35 @@
+<!-- in the html that we are going to be sending through express, include socket io //-->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- connect to our socket.io server //-->
+<script>
+	var socket = io.connect('http://localhost:8080');
+
+	// Listening for the messages event, when it gets called, we call alert and we will have alert with the data that it receives
+	// looking at the hello property, which has a value of world
+	socket.on('messages', function(data){
+		alert(data.hello);
+	});
+
+	socket.on('messages', function(data){insertMeassage(data)});	// insert message into chat
+
+	// submit logic
+	$('#chat_form').submit(function(e){								// hook to the chat form submit button
+		var message = $('#chat_input').val();						// take the input from the chat form and assign it to message var
+
+		socket.emit('messages', message);							// emit the messages even on the server, send it the message that they typed
+	});
+</script>
+
+
+<!-- Below code is for including a nickname for the users //-->
+<script>
+	var server = io.connect('http://localhost:8080');
+
+	server.on('connect', function(data){
+		$('#status').html('Connected to chattr');
+		nickname = prompt("What is your nickname?");
+
+		server.emit('join', nickname);
+	});
+</script>

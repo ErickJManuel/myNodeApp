@@ -1,0 +1,21 @@
+EVENTS
+	events in the DOM 
+
+The DOM triggers Events and you can listen for those events
+	ie 	click		}
+		submit		}	events
+		hover		}
+
+Sample Jquery for a click event
+	$("p").on("click", function(){   });
+
+The above jquery runs when 'click' event is triggered which essentially
+attaches the even to the DOM
+
+Just like the DOM, many objects in NODE emits EVENTS
+
+Odds are if the objects in NODE emit EVENTS they inherit from the EventEmitter constructor
+
+net.Server class inherits from EventEmitter and it emits the  REQUEST event
+
+fs.readStream also inherits from EventEmitter and it emits the DATA event as we are reading data from the file

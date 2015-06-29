@@ -1,0 +1,101 @@
+What is NODE.JS?
+	Allows you to build scalable network applications using JavaScript on the server-side.
+	The engine runs on V8 JavaScript Runtime (same runtime that Chrome browswer uses)
+	Node provides a wrapper around the runtime to add functionality
+	Node is fast because it is written in C
+
+What can you build?
+	Websocket server (chat server)
+	Fast File Upload Client
+	Ad Server
+	Any Real-Time Data Apps
+
+What is NODE.JS not?
+	A Web Framework
+	For Beginners -> Very Low level
+	Multi-Threaded -> Single threaded server
+
+Difference between blocking code and non-blocking code
+Psuedo-code
+Blocking Code
+	Read file from Filesystem, set equal to "contents"
+	Print contents -> Can't print the contents until the file has been read (blocking)
+	Do something else
+
+Non-blocking Code
+	Read file from Filesystem
+		whenever you're complete, print the contents -> this is a "callback"
+	Do Something else
+
+	In the above example, the read will be started and while the read is progressing, the code will do something else.  Once the file is read, it will be printed
+
+Actual Code
+Blocking Code
+	var contents = fs.readFileSync('/etc/hosts');
+	console.log(contents);	-> Stop process until complete
+	console.log('Doing something else');
+
+Non-blocking Code
+	fs.readFile('/etc/hosts', function(err, contents){	-> We are passing in a second function to readFile as a parameter (this is our callback)
+		console.log(contents);
+	});
+
+	console.log('Doing something else');
+
+In the above example, execution does not stop at the console.log(contents); becuase it is a callback, we would continue processing the next line of code and come back
+to the callback once it is complete.
+
+Below logic same as above
+	var callback = function(err, contents){
+		console.log(contents);
+	}
+
+	fs.readFile('/etc/hosts', callback);
+
+	var callback = function(err, contents) {
+		console.log(contents);
+	}
+
+	fs.readFile('/etc/hosts', callback);
+	fs.readFile('/etc/inetcfg', callback);
+
+If we ran the above code as blocking code it would look something like below
+
+	F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1 F2F2F2F2F2F2F2F2F2
+	- - - - - - - - - - - - - - - - - - - - - - - - - 
+	0s                      5s                    10s
+
+Running the above code in a non-blocking format loks like below:
+
+	F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1
+	F2F2F2F2F2F2F2F2F2
+	- - - - - - - - - - - - - - - - - - - - - - - - - 
+	0s                      5s                    10s
+
+Much faster!
+
+For our hello.js see code below:
+	var http = require('http'); // this is how we require modules - This is how we include libraries in node
+
+	http.createServer(function(request, response) {	// we are calling the create server function which takes in one parameter as its callback that parameter contains both request and response
+		response.writeHead(200);	// status code in header
+		response.write("Hello, this is dog.");	// response body
+		response.end(); // Close the connection
+	}).listen(8080); // Listen for connections on this port
+
+	console.log('Listening on port 8080...');
+
+Node is going to register an event, in this case the request event
+Once Node is done running the script it starts the Event Loop which continually checks for events
+When an event occurs, in this case a request comes in, it triggers that event, which runs the callback
+
+Why are we running Javascript?  See below quote from the creator of Node - Ryan Dahl
+	"JavaScript has certain characteristics that make it very different than other dynamic languages, namely that it has no concept of threads.  Its model of concurrency is completely based around events."
+
+Some sample events:
+	Known Events
+	request
+	connection
+	close
+
+When events get triggered from the event loop, they go to an event queue which gets processed one at a time

@@ -1,0 +1,14 @@
+// the <%= name %> tells node app to render that variable inside our html
+// <%= tells the app that we want the value that gets returned to be printed out onto the page
+
+<h1>Tweets for @<%= name %></h1>
+
+<ul>
+// Below is getting the array of information from tweets
+// <% just runs through some code, it does not print it onto the page
+// but in our code, since we want to print out the text in our tweets we are using the <%=
+
+	<% tweets.forEach(function(tweet) { %>
+		<li><%= tweet.text %></li>
+	<% }); %>
+</ul>

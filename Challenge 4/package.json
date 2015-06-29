@@ -1,0 +1,28 @@
+/*
+	1.	Add the connect dependency to package.json
+	2.	Add the underscore dependency to package.json
+
+{
+	"name": "My Awesome Node App",
+	"version": "1",
+	"dependencies": {
+		"connect": "2.1.1",
+		"underscore": "1.3.3"
+	}
+}
+*/
+
+/*
+	1.	Update the connect version on package.json to fetch the latest patch-level changes. All we have to do is add one
+		character to the beginning of the version number.
+	2.	Now update the underscore version on package.json to fetch the latest patch-level changes. Again, all we have
+		to do is add one character to the beginning of the version number.
+*/
+{
+	"name": "My Awesome Node App",
+	"version": "1",
+	"dependencies": {
+		"connect": "~2.1.1",
+		"underscore": "~1.3.3"
+	}
+}

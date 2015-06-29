@@ -1,0 +1,116 @@
+MODULES
+	var http = require('http');		// http.js
+	var fs = require('fs');			// fs.js
+
+	How does 'require' return these libraries?
+	How does it find the files?
+	How might we create our own modules so we can share code between different applications?
+
+How does make request work?
+	var makeRequest = require('./make_request');					// look in the same directory as our app
+	var makeRequest = require('../make_request');					// look in parent directory
+	var makeRequest = require('/Users/eric/nodes/make_request')		// look in this absolute directory
+
+	/Home/eric/my_app/app.js
+	var make_request = require('make_request');
+
+	If we don't include any directory require looks in a node_modules directory, in the order below
+	/Home/erick/my_app/node_modules/make_request.js		// looks in our app directory
+	/Home/erick//node_modules/make_request.js			// looks in my user directory
+	/Home//node_modules/make_request.js					// looks in the home directory
+	/node_modules/make_request.js						// finally it looks in the root directory
+
+In the node_modules directory you will see other directories
+	Each directory is a package which represents the modules
+
+NPM is where we find packages for node
+	Package manager
+	Comes with node
+	Module Repository
+	Dependency Management
+	Easily publish modules
+
+	http://npmjs.org
+
+In our application we need the request package
+	In /Home/my_app
+	$ npm install request
+
+Installs into local node_modules directory
+	Home/my_app/node_modules/request
+
+In /Home/my_app/app.js
+	var request = require('request');
+	Loads from local node_modules directory
+
+Install modules with executables globally (ie coffee-script)
+	$ npm install coffee-script -g
+
+We can then run the executable from the command line, ie below line of code will take app.coffee and translate it into javascript
+	$ coffee app.coffee
+
+Globally installed modules cannot be required in our app
+"Global npm modules can't be required"
+
+Can't do this
+	var coffee = require('coffee-script'); since coffee-script was installed globally, we would need to do the following:
+
+	$ npm install coffee-script
+
+	THEN we can...
+	var coffee = require('coffee-script')
+
+Finding Modules
+	npm registry
+	github search
+	npm command line -> if you think you know the name
+
+Best practice
+	make a package.json file in your application directory
+	my_app/package.json
+
+Inside this file you can specify a lot of options, in this example...
+	{
+		"name": "My App",
+		"version": "1",
+		"dependencies": {			// most important, our dependencies, the modules our app needs to run
+			"connect": "1.8.7"		// our application is requiring the connect module and specifically version 1.8.7 of that module
+		}
+	}
+
+Once we have our dependencies listed out, we can make sure that they are installed by running npm install
+	$ npm install
+
+THis will look in our package.json and install any modules that we don't have installed which are listed in our dependencies
+	In this case it will install:
+		my_app/node_modules/connect
+
+when you install a module, npm install also makes sure that the modules you installed also install the dependencies on THAT module
+So if you look in the connect folder you will see it has it's own node_modules folder that contain ITS dependencies, ie.
+	connect/node_modules/qs
+	connect/node_modules/mime
+	connect/node_modules/formidable
+
+Semantic versioning:
+	in our module
+		"connect": "1.8.7"
+			1	-> Major Version
+			8	-> Minor Version
+			7	-> Patch Version
+
+	What are the differences?
+		Patch doesn't change the API, doesn't change the names of the functions you may call
+		Minor probably won't change the API, a little safer to assume that it is not
+		Major you can assume WILL change the API
+
+	Including a range of versions
+		"connect": "~1"	includes the most recent version that is >= 1.0.0 but < 2.0.0
+			Dangerous because some minor versions may break things, but for newer apps this should be ok still
+
+		"connect": "~1.8"	Will include the most recent version that is >= 1.8.0 but < 1.9.0	API could change
+			Safer, but API COULD change
+
+		"connect": "~1.8.7" will include the most recent version that is >= 1.8.7 but < 1.9.0
+			This is considered safe
+
+http://semver.org/

@@ -1,0 +1,37 @@
+EXPRESS
+	Sinatra inspired web development framework for Node.js -- insanely fast, flexible and simple
+	Sinatra is a simple web development framework for Ruby
+
+	Provides things like:
+		Easy route URLs to callbacks
+		Middleware (from Connect)
+		Environment based configuration
+		Redirection helpers
+		File Uploads
+
+Building our express app
+	require the library
+		var express = require('express');
+
+	install it using npm
+		$ npm install --save express
+			the --save adds express to our dependencies in our package.json file
+
+	create an instance of express
+		var app = express();
+
+	start defining endpoints
+		app.get('/', function(request, response) {
+			response.sendFile(__dirname + "/index.html");
+		});
+			Here we are defining an endpoint at the root route (the '/')
+			When somebody sends the get request, it is going to call the callback we are sending in
+			We are calling the response.sendfile which will read in a file in our file system and
+			send it back with a response
+
+	tell it to listen to port 8080
+		app.listen(8080);
+
+	now if we call curl we should get a response from our server
+		$ curl http://localhost:8080/
+			200 OK

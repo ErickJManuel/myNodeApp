@@ -1,0 +1,21 @@
+PERSISTING DATA
+	Write data into a database
+		MongoDB
+		CouchDB
+		PostgreSQL
+		Memcached
+		Riak
+		Redis
+			All of the above is non-blocking
+
+	Redis Data structures
+		data structure 				commands
+		--------------				--------
+		Strings						SET, GET, APPEND, DECR, INCR...
+		Hashes						HSET, HGET, HDEL, HGETALL...
+		Lists						LPUSH, LREM, LTRIM, RPOP, LINSERT...
+		Sets 						SADD, SREM, SMOVE, SMEMBERS...
+		Sorted Sets 				ZADD, ZREM, ZSCORE, ZRANK...
+
+		Go to redis.io to learn about how to use it
+		
